@@ -1,0 +1,797 @@
+{
+  "name": "hr recuritement automation",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "enter your data ",
+        "formDescription": "enter your data , it will only used for professional purposes ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "First name ",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Last name "
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "resume ",
+              "fieldType": "file"
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "Non - job - code ",
+              "fieldValue": "job-dode-001"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -144,
+        144
+      ],
+      "id": "b576e1aa-d701-474b-ab4b-e8cdf1f2514c",
+      "name": "ai job form",
+      "webhookId": "ea768095-6f82-4c1e-9621-f25e9cb68bf0"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "resume_",
+        "name": "={{ $json[\"Non - job - code \"] }}-{{ $json[\"First name \"] }}-{{ $json[\"Last name \"] }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1IOQ31cKD9XrD_7QfPpPsRkidGTESn-Zf",
+          "mode": "list",
+          "cachedResultName": "Resumes",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1IOQ31cKD9XrD_7QfPpPsRkidGTESn-Zf"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        256,
+        96
+      ],
+      "id": "e59f6b89-b7ed-4ac5-8018-31bf4991bf02",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vSEzpFZHXySzyYCk",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "resume_",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        304
+      ],
+      "id": "1c66703a-fc7d-4ac8-9fbb-ed5ee7bfb159",
+      "name": "extract data from resume"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        352,
+        1392
+      ],
+      "id": "6eee160f-b396-4667-a418-b2d8a1ba8e91",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LRn5JhRGwl3D1aM5",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"professional_information\": {\n    \"professional_headline\": \"string or null\",\n    \"professional_summary\": \"string or null\",\n    \"current_professional_status\": \"string or null\",\n    \"total_experience\": \"string or null\",\n    \"skills\": [\n      {\n        \"skill_name\": \"string\",\n        \"category\": \"string or null\",\n        \"proficiency\": \"string or null\"\n      }\n    ],\n    \"work_experience\": [\n      {\n        \"job_title\": \"string or null\",\n        \"company_name\": \"string or null\",\n        \"employment_type\": \"string or null\",\n        \"location\": \"string or null\",\n        \"start_date\": \"string or null\",\n        \"end_date\": \"string or null\",\n        \"is_current\": \"boolean or null\",\n        \"responsibilities\": [\"string\"],\n        \"achievements\": [\"string\"],\n        \"technologies_used\": [\"string\"]\n      }\n    ],\n    \"projects\": [\n      {\n        \"project_name\": \"string or null\",\n        \"description\": \"string or null\",\n        \"role\": \"string or null\",\n        \"technologies\": [\"string\"],\n        \"start_date\": \"string or null\",\n        \"end_date\": \"string or null\",\n        \"project_url\": \"string or null\",\n        \"achievements\": [\"string\"]\n      }\n    ],\n    \"education\": [\n      {\n        \"degree\": \"string or null\",\n        \"field_of_study\": \"string or null\",\n        \"institution\": \"string or null\",\n        \"location\": \"string or null\",\n        \"start_date\": \"string or null\",\n        \"end_date\": \"string or null\",\n        \"grade\": \"string or null\"\n      }\n    ],\n    \"certifications\": [\n      {\n        \"certification_name\": \"string\",\n        \"issuing_organization\": \"string or null\",\n        \"issue_date\": \"string or null\",\n        \"expiry_date\": \"string or null\",\n        \"credential_url\": \"string or null\"\n      }\n    ],\n    \"achievements_and_awards\": [\"string\"],\n    \"publications\": [\"string\"],\n    \"languages\": [\n      {\n        \"language\": \"string\",\n        \"proficiency\": \"string or null\"\n      }\n    ],\n    \"professional_memberships\": [\"string\"],\n    \"additional_information\": [\"string\"]\n  }\n}",
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        496
+      ],
+      "id": "91d2e231-511b-4149-919e-0060ec034fa9",
+      "name": "professional"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"personal_information\": {\n    \"full_name\": \"string or null\",\n    \"first_name\": \"string or null\",\n    \"middle_name\": \"string or null\",\n    \"last_name\": \"string or null\",\n    \"preferred_name\": \"string or null\",\n    \"date_of_birth\": \"string or null\",\n    \"gender\": \"string or null\",\n    \"nationality\": \"string or null\",\n\n    \"contact_information\": {\n      \"email\": \"string or null\",\n      \"email_url\": \"string or null\",\n      \"phone_numbers\": [\n        {\n          \"number\": \"string\",\n          \"type\": \"string or null\"\n        }\n      ],\n      \"alternate_email\": \"string or null\",\n      \"website\": \"string or null\"\n    },\n\n    \"address\": {\n      \"street\": \"string or null\",\n      \"city\": \"string or null\",\n      \"state\": \"string or null\",\n      \"country\": \"string or null\",\n      \"postal_code\": \"string or null\"\n    },\n\n    \"social_profiles\": {\n      \"linkedin\": \"string or null\",\n      \"github\": \"string or null\",\n      \"portfolio\": \"string or null\",\n      \"other_profiles\": [\n        {\n          \"platform\": \"string\",\n          \"url\": \"string\"\n        }\n      ]\n    },\n\n    \"professional_preferences\": {\n      \"preferred_job_location\": [\"string\"],\n      \"willing_to_relocate\": \"boolean or null\",\n      \"availability\": \"string or null\"\n    }\n  }\n}",
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        240
+      ],
+      "id": "2c661088-5fc0-4aeb-925c-77dfc08ade28",
+      "name": "Information Extractor personal"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        912,
+        240
+      ],
+      "id": "d61f3215-037b-45a9-90e4-8db13bf10f2a",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "options": {
+          "summarizationMethodAndPrompts": {
+            "values": {
+              "combineMapPrompt": "=Given the information below for a job applicant, write a concise summary for it. While summarizing, be professional, concise, & conversational. Use 400 words or less.\n\nHere is the detailed information about the applicant:\n\nName:{{ $json.output.personal_information.name }}\nCity: {{ $json.output.personal_information.location }}\nEducational qualification:{{ $json.output.education[0].degree }}\nJob History :\nSkills:{{ $json.output.technical_skills.programming }}{{ $json.output.technical_skills.ai_genai }}{{ $json.output.technical_skills.automation }}\n\nPrevious experience: {{ $json.output.experience[0].period }} {{ $json.output.experience[0].job_title }}\nApplied date: {{ $now.format('yyyy-MM-dd') }}",
+              "prompt": "=Given the information below for a job applicant, write a concise summary for it. While summarizing, be professional, concise, & conversational. Use 400 words or less.\n\nHere is the detailed information about the applicant:\n\nName:{{ $json.output.personal_information.name }}\nCity: {{ $json.output.personal_information.location }}\nEducational qualification:{{ $json.output.education[0].degree }}\nJob History :\nSkills:{{ $json.output.technical_skills.programming }}{{ $json.output.technical_skills.ai_genai }}{{ $json.output.technical_skills.automation }}\n\nPrevious experience: {{ $json.output.experience[0].period }} {{ $json.output.experience[0].job_title }}\nApplied date: {{ $now.format('yyyy-MM-dd') }}\nCONCISE SUMMARY:"
+            }
+          },
+          "batching": {}
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "typeVersion": 2.1,
+      "position": [
+        1136,
+        240
+      ],
+      "id": "fd86670e-bb94-4b55-ab11-1cb9c9d1e864",
+      "name": "Summarization Chain"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "159lSTnFa86w2YNsyGbdn2UtN_Ub5Y1UKnxhBXC5eUmY"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        240
+      ],
+      "id": "ae68d28b-1e72-44d4-8a33-7387b86423c7",
+      "name": "get JD",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "cqExFL1bZWTXT5SV",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"ai_resume_score\": {\n      \"type\": \"string\"\n    },\n    \"ai_evaluation\": {\n      \"type\": \"string\"\n    }\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1872,
+        448
+      ],
+      "id": "f327f7d4-6d8a-4196-9017-df48f5d88ae1",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1mBuY5jx5hMAYpwBAvASw-5QiKI-2AtP-5pEnsVnmGaw",
+          "mode": "list",
+          "cachedResultName": "job tracker ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mBuY5jx5hMAYpwBAvASw-5QiKI-2AtP-5pEnsVnmGaw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mBuY5jx5hMAYpwBAvASw-5QiKI-2AtP-5pEnsVnmGaw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Final Score": "={{ $json.output.ai_resume_score }}",
+            "Applicant Name": "={{ $('professional').item.json.output.personal_information.name }}",
+            "Applicant Email": "={{ $('professional').item.json.output.personal_information.contact.email }}",
+            "Total Experience": "={{ $('professional').item.json.output.experience[0].duration }}",
+            "Job History": "={{ $('professional').item.json.output.experience[0].company }}",
+            "Skills": "={{ $('professional').item.json.output.technical_skills.programming_languages }},{{ $('professional').item.json.output.technical_skills.ai_genai }},{{ $('professional').item.json.output.technical_skills.automation }}",
+            "Applicant Location": "={{ $('professional').item.json.output.personal_information.location }}",
+            "Applicant Phone": "={{ $('professional').item.json.output.personal_information.contact.phone_numbers[0] }},{{ $('professional').item.json.output.personal_information.contact.phone_numbers[1] }}",
+            "Applicant Education": "={{ $('professional').item.json.output.education[0].institution }}",
+            "Job Code": "={{ $('ai job form').item.json['Non - job - code '] }}",
+            "AI Status": "={{ $json['Candidate Status'] }}",
+            "AI Assessment": "={{ $json['Final Score'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Job Code",
+              "displayName": "Job Code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hiring Manager",
+              "displayName": "Hiring Manager",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Hiring Manager Email",
+              "displayName": "Hiring Manager Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Applicant Name",
+              "displayName": "Applicant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Applicant Email",
+              "displayName": "Applicant Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Application Date",
+              "displayName": "Application Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Final Score",
+              "displayName": "Final Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Status",
+              "displayName": "AI Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AI Assessment",
+              "displayName": "AI Assessment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total Experience",
+              "displayName": "Total Experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experience Summary",
+              "displayName": "Experience Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Job History",
+              "displayName": "Job History",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Skills",
+              "displayName": "Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Applicant Location",
+              "displayName": "Applicant Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Applicant Phone",
+              "displayName": "Applicant Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Applicant Education",
+              "displayName": "Applicant Education",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2912,
+        224
+      ],
+      "id": "f0409d53-cc91-4fc0-a26d-9c4c82a36f80",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YP3NgwW1xIsVtbVN",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "results = []\n\nfor item in _items:\n    data = item[\"json\"]\n\n    # Extract nested AI evaluation\n    output = data.get(\"output\", {})\n\n    # Get candidate score\n    score = output.get(\"ai_resume_score\", 0)\n\n    try:\n        score = float(str(score).split(\"/\")[0].strip())\n    except (ValueError, TypeError):\n        score = 0\n\n    # Categorize candidate\n    if score >= 7:\n        status = \"Shortlisted\"\n    elif score >= 5:\n        status = \"Under Review\"\n    else:\n        status = \"Rejected\"\n\n    # Add classification\n    data[\"Final Score\"] = score\n    data[\"Candidate Status\"] = status\n\n    results.append({\n        \"json\": data\n    })\n\nreturn results"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        240
+      ],
+      "id": "228570e4-915b-46f5-9887-2df93e6de474",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['Candidate Status'] }}",
+                    "rightValue": "Shortlisted",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "bf41ee60-c2da-4298-a2a7-dcc78699004c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Shortlisted candidate "
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "72e2e06e-f772-4030-99bb-8a9efca91252",
+                    "leftValue": "={{ $json['Candidate Status'] }}",
+                    "rightValue": "Under Review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "potential candidate "
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "103abf29-8ef0-42ac-b017-aa34b0c1a5f2",
+                    "leftValue": "={{ $json['Candidate Status'] }}",
+                    "rightValue": "Rejected",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Rejected candidate "
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        2416,
+        224
+      ],
+      "id": "eee83670-d69d-4995-b8f7-ec8af5f30144",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=job posting details :\n {{ $json.content }}\n\ncandidate profile summary :\n{{ $('Summarization Chain').item.json.output.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an HR expert and you need to understand if the candidate aligns with the profile sought by the company. You must give a score from 1 to 10, where 1 means the candidate does not align with what is required, while 10 means they are the ideal candidate because they fully reflect the desired profile.  Furthermore, in the 'consideration' field, explain the reasoning behind your score."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1728,
+        240
+      ],
+      "id": "be957f66-34da-4aa3-8e6c-e4a7560e9512",
+      "name": "give score to candidate"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Information Extractor personal').item.json.output.personal_information.contact.email }}",
+        "subject": "ai - job posting ",
+        "emailType": "text",
+        "message": "Congratulations ! Your Profile has been shortlisted for ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3136,
+        224
+      ],
+      "id": "d4554517-fcb9-46e3-96d3-136c21afa519",
+      "name": "Send a message",
+      "webhookId": "c8285b8a-99cb-4213-a72f-0291b7050297",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "N28ARgrFOqT605pN",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Merge').item.json.output.personal_information.email }}",
+        "subject": "ai - job profile ",
+        "emailType": "text",
+        "message": "Unfortunately! your profile has not been shortlisted this time .",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2816,
+        416
+      ],
+      "id": "4c8bf0a7-ce04-4a10-92b9-fe0a41a53ebf",
+      "name": "Send a message1",
+      "webhookId": "c573b7f4-18fc-44f1-937a-50662c71477e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "N28ARgrFOqT605pN",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "ai job form": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "extract data from resume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract data from resume": {
+      "main": [
+        [
+          {
+            "node": "professional",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Information Extractor personal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "professional",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Summarization Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "give score to candidate",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Information Extractor personal",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "professional": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Information Extractor personal": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarization Chain": {
+      "main": [
+        [
+          {
+            "node": "get JD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get JD": {
+      "main": [
+        [
+          {
+            "node": "give score to candidate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "give score to candidate",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "give score to candidate": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7bcce077-9e41-4031-8767-bcb27b09aca5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7179cb2945fbd461827fb270b08a0d7601c6666233b5fc27b729cd61ee81d4df"
+  },
+  "nodeGroups": [],
+  "id": "hDWYmmE4hpN1DM4z",
+  "tags": []
+}
